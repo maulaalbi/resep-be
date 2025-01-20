@@ -171,9 +171,9 @@ const getAll = async (user)=>{
             ratings : true
         }
     })
-   if(!meal){
-        throw new ResponseError(404,"meal not found");
-   }
+    if (meal.length === 0) {
+        throw new ResponseError(404, "meal not found");
+    }
     return meal;
 }
 
