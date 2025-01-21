@@ -9,6 +9,7 @@ publicRouter.post('/api/users',userController.register);
 publicRouter.post('/api/users/login',userController.login);
 publicRouter.get('/api/usersAll',userController.getUserAll);
 publicRouter.get('/api/mealsAll', mealController.getAllMeal);
+publicRouter.get('/api/meals/search', mealController.search);
 
 
 

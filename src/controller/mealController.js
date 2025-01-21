@@ -33,7 +33,7 @@ const update = async (req, res, next) => {
     const rating = async (req, res, next) => {
         try{
             const user = req.user;
-            const idMeal = req.params.idMeal
+            const idMeal = req.params.idMeal;
             const request = req.body;
             const result = await mealService.ratingMeal(user, idMeal, request);
             res.status(200).json({
@@ -41,6 +41,24 @@ const update = async (req, res, next) => {
             })
 
         }catch(e){
+            next(e);
+        }
+}
+
+const search = async (req, res, next) => {
+    const { q: query, page = 1, limit = 10 } = req.query;
+
+        if (!query) {
+            return res.status(400).json({ message: 'Query parameter "q" is required' });
+        }
+
+        try {
+            const results = await mealService.search(query, parseInt(page), parseInt(limit));
+            res.status(200).json({
+                data : results
+
+            });
+        } catch (e) {
             next(e);
         }
 }
@@ -104,5 +122,6 @@ export default {
     update,
     deleteById,
     rating,
-    getAllMeal
+    getAllMeal,
+    search
 }

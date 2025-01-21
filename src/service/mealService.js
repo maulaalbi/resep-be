@@ -101,21 +101,34 @@ const ratingMeal = async (user,idMeal,request) => {
     const validateRating = validate(ratingMealValidation,request);
 
     const valueRating = parseInt(validateRating.rating,10);
-    console.log(valueRating);
     const userId = parseInt(user.id,10);
     const mealId = parseInt(idMeal,10);
     const ratings = await prismaClient.rating.create({
         data : {
             userId : userId,
             mealId : mealId,
-            rating : valueRating
+            rating : valueRating,
+            comments : validateRating.comments
         },
         select:{
-            rating : true
+            rating : true,
+            comments : true
         }
 
     })
     return ratings;
+}
+
+const search = async (query, page=1, limit=10) => {
+    const results = await prismaClient.$queryRaw`
+    SELECT * FROM \`meals\`
+    WHERE LOWER(\`nameMeal\`) LIKE LOWER(${`%${query}%`})
+       OR LOWER(\`category\`) LIKE LOWER(${`%${query}%`})
+    LIMIT ${limit}
+    OFFSET ${(page - 1) * limit}
+  `;
+
+    return results;
 }
 
 const update = async (user,request)=>{
@@ -211,5 +224,6 @@ export default {
     update,
     deleteById,
     ratingMeal,
-    getAllMeal
+    getAllMeal,
+    search
 }

@@ -17,7 +17,8 @@ const updateMealValidation = Joi.object({
 })
 
 const ratingMealValidation = Joi.object({
-   rating: Joi.number().positive().required()
+   rating: Joi.number().positive().required(),
+   comments: Joi.string().max(1000).optional(),
 })
 
 export {

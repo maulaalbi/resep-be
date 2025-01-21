@@ -38,10 +38,11 @@ model Meal {
 }
 
 model Rating {
-  id         Int     @id @default(autoincrement())
-  userId     Int     @db.Int
-  mealId     Int     @db.Int
-  rating     Int     @db.Int
+  id         Int       @id @default(autoincrement())
+  userId     Int       @db.Int
+  mealId     Int       @db.Int
+  rating     Int?      @db.Int
+  comments   String?   @db.Text
   user      User     @relation(fields: [userId], references: [id])
   meals      Meal    @relation(fields: [mealId], references: [id])
 
