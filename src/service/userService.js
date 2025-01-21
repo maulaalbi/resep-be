@@ -1,4 +1,4 @@
-import { prismaClient } from "../application/database.js";
+import { prismaClient  } from "../application/database.js";
 import { ResponseError } from "../error/responseError.js";
 import { getUserValidation, loginUserValidation, registerUserValidation, updateUserValidation } from "../validation/userValidation.js";
 import { validate } from "../validation/validation.js";
@@ -8,7 +8,6 @@ import {v4 as uuid} from "uuid";
 
 const register = async (body) =>{
     const user = validate(registerUserValidation,body);
-
     const countUser = await prismaClient.user.count({
         where : {
             email : user.email
@@ -25,7 +24,10 @@ const register = async (body) =>{
         data : user,
         select:{
             email : true,
-            name : true
+            name : true,
+            gender : true,
+            tgl_lahir : true,
+            alamat : true,
         }
     })
 }
@@ -36,7 +38,10 @@ const getUserAll = async(body)=>{
             id: true,
             email : true,
             name : true,
-            token: true
+            token: false,
+            gender : true,
+            tgl_lahir : true,
+            alamat : true,
         }
     })
 
@@ -93,6 +98,9 @@ const get = async (email)=>{
             id : true,
             email : true,
             name : true,
+            gender : true,
+            tgl_lahir : true,
+            alamat : true,
         }
     })
 

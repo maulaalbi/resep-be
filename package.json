@@ -4,7 +4,8 @@
   "description": "resep backend",
   "main": "src/main.js",
   "scripts": {
-    "test": "jest -i"
+    "test": "jest -i",
+    "dev" : "nodemon src/main.js"
   },
   "jest": {
     "transform": {
@@ -22,6 +23,7 @@
     "googleapis": "^144.0.0",
     "joi": "^17.13.3",
     "multer": "^1.4.5-lts.1",
+    "nodemon": "^3.1.9",
     "uuid": "^11.0.5",
     "winston": "^3.17.0"
   },

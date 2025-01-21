@@ -13,14 +13,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique @db.VarChar(100)
-  password String @db.VarChar(100)
-  name     String @db.VarChar(100)
-  token    String? @db.VarChar(100)
-  meals    Meal[]
-  ratings Rating[]
+  id        Int     @id @default(autoincrement())
+  email     String  @unique @db.VarChar(100)
+  password  String  @db.VarChar(100)
+  name      String  @db.VarChar(100)
+  gender    String? 
+  tgl_lahir String
+  alamat    String  @default("")
+  token     String? @db.VarChar(100)
+  meals     Meal[]
+  ratings   Rating[]
   @@map("users")
 }
 
