@@ -6,6 +6,10 @@ import { createMealValidation, getMealValidation, ratingMealValidation, updateMe
 import { validate } from "../validation/validation.js";
 import fs from "fs";
 import {google} from "googleapis";
+import {v4 as uuid} from "uuid";
+import midtransClient from 'midtrans-client';
+import short from 'short-uuid';
+
 
 
 
@@ -63,6 +67,7 @@ const create = async  (user,fileData,request)=>{
                 nameMeal : true,
                 category : true,
                 instructions : true,
+                price : true,
                 imageMeal : true,
                 userId : true
             }
@@ -85,7 +90,8 @@ const get = async (user,idMeal)=>{
             nameMeal : true,
             category : true,
             instructions : true,
-            rating : true
+            ratings : true,
+            price : true
         }
     }) 
 
@@ -118,6 +124,103 @@ const ratingMeal = async (user,idMeal,request) => {
     })
     return ratings;
 }
+
+const saveMeal = async(user,idMeal)=>{
+    const userId = parseInt(user.id);
+    const mealId = parseInt(idMeal);
+    const saveMeal = await prismaClient.save.create({
+        data : {
+            userId : userId,
+            mealId : mealId
+        },
+        select:{
+            saveId: true,
+            userId : true,
+            mealId : true
+        }
+    })
+    if(!saveMeal){
+        throw new ResponseError(404,"meal not found");
+    }
+
+    return saveMeal;
+}
+
+let snap = new midtransClient.Snap({
+    // Set to true if you want Production Environment (accept real transaction).
+    isProduction : false,
+    serverKey : process.env.SERVER_KEY
+});
+const payMeal = async (user,idMeal)=>{
+    const userId = parseInt(user.id);
+    const mealId = parseInt(idMeal);
+    const meal = await prismaClient.meal.findFirst({
+        where : {
+            id : mealId,
+        },select:{
+            id:true,
+            price : true,
+        
+        }
+    });
+
+    const users = await prismaClient.user.findFirst({
+        where : {
+            id : userId
+        },select:{
+            id : true,
+            name : true,
+            email : true
+        }
+    })
+
+    
+    const idOrder = uuid().toString().replace(/-/g, '').substring(0, 8);
+    const authString = btoa(process.env.AUTH_STRING); 
+    let parameter = {
+        transaction_details: {
+            "order_id": idOrder,
+            "gross_amount": parseInt(meal.price)
+        },
+        credit_card:{
+            secure : true
+        },
+        customer_details: {
+           "first_name": users.name,
+           "last_name": users.name,
+           "email": users.email,
+           "phone": ""
+        }
+    };
+
+    const response = await fetch(process.env.URL_SERVER,{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Basic ${authString}`
+        },
+        body: JSON.stringify(parameter)
+    })
+
+    const pay = await prismaClient.transaction.create({
+        data : {
+            orderId : parameter.transaction_details.order_id,
+            userId  : users.id,    
+            mealId  : meal.id,
+            name    : users.name, 
+            price   : parseInt(meal.price)  
+        }
+    })
+
+ 
+    const transaction = await snap.createTransaction(parameter);
+    const transactionToken = transaction.token;
+    const transactionUrl = transaction.redirect_url;
+    return  transactionUrl;
+   
+}
+
 
 const search = async (query, page=1, limit=10) => {
     const results = await prismaClient.$queryRaw`
@@ -190,6 +293,30 @@ const getAll = async (user)=>{
     return meal;
 }
 
+const getAllUserSave = async (userId)=>{
+    try {
+        const save = await prismaClient.save.findMany({
+            where :{
+                userId : userId
+            },
+            select:{
+                saveId : true,
+                userId : true,
+                mealId : true,
+                meals : true
+            }
+        })
+        return save;
+    }catch (e){
+        console.log(e.message);
+        throw new ResponseError(500, e.message);
+    }
+    
+
+}
+
+
+
 const deleteById = async (user,idMeal)=>{
     idMeal = validate(getMealValidation,idMeal);
     const meal = await prismaClient.meal.delete({
@@ -201,6 +328,7 @@ const deleteById = async (user,idMeal)=>{
 }
 
 const getAllMeal = async(body)=>{
+    //admin
     const getAll = await prismaClient.meal.findMany({
         select:{
             id : true,
@@ -208,6 +336,7 @@ const getAllMeal = async(body)=>{
             category : true,
             imageMeal : true,
             instructions : true,
+            price : true,
             userId : true,
             ratings : true
         }
@@ -215,6 +344,21 @@ const getAllMeal = async(body)=>{
 
     return getAll;  
 }
+
+const getAllSave = async(body)=>{
+    //admin
+    const getAll = await prismaClient.save.findMany({
+        select:{
+            saveId: true,
+            userId : true,
+            mealId : true,
+            meals : true,
+        }
+    })
+    return getAll;
+}
+
+
 
 
 export default {
@@ -225,5 +369,10 @@ export default {
     deleteById,
     ratingMeal,
     getAllMeal,
-    search
+    search,
+    saveMeal,
+    getAllSave,
+    getAllUserSave,
+    payMeal
+ 
 }

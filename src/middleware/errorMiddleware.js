@@ -17,7 +17,7 @@ const errorMiddleware = (err, req, res, next) => {
         statusCode = err.status;
         errorMessage = err.message;
     }
-    // Jika error memiliki pesan, gunakan pesan tersebut
+    // Jika error memiliki pesan, gunakan pesan tersebuts
     else if (err.message) {
         errorMessage = err.message;
     }

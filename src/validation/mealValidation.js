@@ -4,6 +4,7 @@ const createMealValidation = Joi.object({
     nameMeal       : Joi.string().max(100).required(),
     category    : Joi.string().max(100).required(),
     instructions : Joi.string().max(1000).required(),
+    price : Joi.string().max(1000).optional(),
 });
 
 
@@ -20,6 +21,8 @@ const ratingMealValidation = Joi.object({
    rating: Joi.number().positive().required(),
    comments: Joi.string().max(1000).optional(),
 })
+
+
 
 export {
     createMealValidation,

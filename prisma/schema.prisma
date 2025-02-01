@@ -29,20 +29,26 @@ model User {
   tgl_lahir String
   alamat    String  @default("")
   token     String? @db.VarChar(100)
-  meals     Meal[]
-  ratings   Rating[]
+  meals         Meal[]
+  ratings       Rating[]
+  saves         Save[]
+  transactions  Transaction[]
+
   @@map("users")
 }
 
 model Meal {
-  id           Int    @id @default(autoincrement())
-  nameMeal     String @db.VarChar(100)
-  category     String @db.VarChar(100)
-  instructions String @db.Text
-  imageMeal    String @default("default_image_url")
-  userId       Int    @db.Int
-  user      User      @relation(fields: [userId], references: [id])
-  ratings Rating[]
+  id            Int    @id @default(autoincrement())
+  nameMeal      String @db.VarChar(100)
+  category      String @db.VarChar(100)
+  instructions  String @db.Text
+  imageMeal     String @default("default_image_url")
+  userId        Int    @db.Int
+  price         String?
+  user          User      @relation(fields: [userId], references: [id])
+  ratings       Rating[]
+  saves         Save[]
+  transactions  Transaction[]
   
   @@map("meals")
 }
@@ -53,10 +59,34 @@ model Rating {
   mealId     Int       @db.Int
   rating     Int?      @db.Int
   comments   String?   @db.Text
-  user      User     @relation(fields: [userId], references: [id])
-  meals      Meal    @relation(fields: [mealId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+  meals      Meal      @relation(fields: [mealId], references: [id])
 
   @@map("ratings")
 
+
+}
+
+model Save {
+  saveId     Int       @id @default(autoincrement())
+  userId     Int       @db.Int
+  mealId     Int       @db.Int
+  user       User      @relation(fields: [userId], references: [id])
+  meals      Meal      @relation(fields: [mealId], references: [id])
+
+  @@map("saves")
+}
+
+model Transaction {
+  id             Int    @id @default(autoincrement())
+  orderId        String @unique
+  userId         Int    @db.Int
+  mealId         Int    @db.Int
+  name           String 
+  status         String?
+  price          Int    @db.Int
+  user       User      @relation(fields: [userId], references: [id])
+  meals      Meal      @relation(fields: [mealId], references: [id])
+  @@map("transactions")
 
 }

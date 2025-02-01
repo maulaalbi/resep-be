@@ -1,3 +1,4 @@
+import { logger } from "../application/logger.js";
 import mealService from "../service/mealService.js";
 
 
@@ -43,6 +44,34 @@ const update = async (req, res, next) => {
         }catch(e){
             next(e);
         }
+}
+
+const saveMeal = async (req, res, next) => {
+    try{
+        const user = req.user;
+        const idMeal = req.params.idMeal;
+        const result = await mealService.saveMeal(user, idMeal);
+        res.status(200).json({
+            data : result
+        })
+
+    }catch(e){
+        next(e);
+    }
+}
+const payMeal = async (req, res,next) => {
+    try{
+        const user = req.user;
+        const idMeal = req.params.idMeal;
+        const result = await mealService.payMeal(user, idMeal);
+        res.status(200).json({
+            data : {
+                url_redirect : result
+            }
+        })
+    }catch(e){
+        next(e);
+    }
 }
 
 const search = async (req, res, next) => {
@@ -92,9 +121,9 @@ const get = async(req, res, next)=>{
 }
 
 const getAll = async(req, res, next)=>{
+    //get all meal by user
     try{
         const user = req.user;
-
         const result = await mealService.getAll(user);
         res.status(200).json({
             data : result
@@ -104,9 +133,38 @@ const getAll = async(req, res, next)=>{
     }
 }
 
+const getAllUserSave = async(req, res, next)=>{
+    //get all meal by user
+    try{
+        const userId = req.user.id;
+
+        const result = await mealService.getAllUserSave(userId);
+        res.status(200).json({
+            data : result
+        })
+    }catch(e){
+        next(e);
+    }
+}
+
+
+
 const getAllMeal = async (req, res, next)=>{
+    //admin
     try {
         const result = await mealService.getAllMeal();
+        res.status(200).json({
+            data : result
+        });
+    }catch(e){
+        next(e);
+    }
+}
+
+const getAllSave = async (req, res, next)=>{
+    //admin
+    try {
+        const result = await mealService.getAllSave();
         res.status(200).json({
             data : result
         });
@@ -123,5 +181,10 @@ export default {
     deleteById,
     rating,
     getAllMeal,
-    search
+    search,
+    saveMeal,
+    getAllSave,
+    getAllUserSave,
+    payMeal,
+ 
 }
